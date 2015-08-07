@@ -1,7 +1,7 @@
 ######################
 # Project Specific
 ######################
-/src/main/webapp/dist
+#/src/main/webapp/dist
 
 ######################
 # Node
@@ -32,6 +32,7 @@ local.properties
 .settings/**
 .loadpath
 /src/main/resources/rebel.xml
+.springBeans
 
 # External tool builders
 .externalToolBuilders/**
@@ -121,3 +122,12 @@ Desktop.ini
 # Gradle Wrapper
 ######################
 !gradle/wrapper/gradle-wrapper.jar
+/target/
+
+######################
+# Sublime Text
+######################
+/*.sublime-project
+/*.sublime-workspace
+
+*.out
