@@ -1,0 +1,21 @@
+{
+  "generator-jhipster": {
+    "baseName": "abcgo",
+    "packageName": "org.abcgo",
+    "packageFolder": "org/abcgo",
+    "authenticationType": "oauth2",
+    "hibernateCache": "ehcache",
+    "clusteredHttpSession": "no",
+    "websocket": "spring-websocket",
+    "databaseType": "sql",
+    "devDatabaseType": "h2Memory",
+    "prodDatabaseType": "postgresql",
+    "searchEngine": "no",
+    "useCompass": false,
+    "buildTool": "maven",
+    "frontendBuilder": "grunt",
+    "javaVersion": "8",
+    "enableTranslation": true,
+    "rememberMeKey": "333870a1d0651a4cf84702d2f22b0f252e5ebb79"
+  }
+}
