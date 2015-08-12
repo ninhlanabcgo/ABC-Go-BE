@@ -418,7 +418,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.apache.maven.plugins</groupId>
                                         <artifactId>maven-enforcer-plugin</artifactId>
-                                        <versionRange>[1.0,)</versionRange>
+                                        <versionRange>[1.0,)</versionRange>                                     
                                         <goals>
                                             <goal>enforce</goal>
                                         </goals>
@@ -728,6 +728,10 @@
         </profile>
         <profile>
             <id>openshift</id>
+            <properties>
+                <maven.compiler.executable>${OPENSHIFT_DATA_DIR}/jdk1.8.0_20/bin/javac</maven.compiler.executable>
+                <maven.compiler.fork>true</maven.compiler.fork>
+            </properties>			
             <dependencies>
                 <dependency>
                     <groupId>org.springframework.boot</groupId>

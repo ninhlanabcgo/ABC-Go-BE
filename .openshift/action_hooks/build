@@ -2,6 +2,8 @@
 cd $OPENSHIFT_REPO_DIR/ABC-Go
 git pull -s recursive -X theirs upstream master
 git update-index --chmod=+x .openshift/action_hooks/*
+#export JAVA_HOME="$OPENSHIFT_DATA_DIR/jdk/jdk1.8.0_20"
+#export PATH=$JDK8_PATH:$PATH
 export PATH=$OPENSHIFT_DATA_DIR/jdk1.8.0_20/bin:$PATH
-export JAVA_HOME=$OPENSHIFT_DATA_DIR/jdk1.8.0_20/
+export JAVA_HOME="$OPENSHIFT_DATA_DIR/jdk/jdk1.8.0_20"
 mvn package -s .openshift/settings.xml -DskipTests=true -Popenshift
