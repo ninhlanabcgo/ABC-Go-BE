@@ -360,7 +360,7 @@ module.exports = function (grunt) {
         'usemin',
         'htmlmin'
     ]);
-
+    
 	grunt.registerTask('appendSkipBower', 'Force skip of bower for Gradle', function () {
 
 		if (!grunt.file.exists(filepath)) {
