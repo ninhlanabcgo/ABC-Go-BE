@@ -749,7 +749,7 @@
             </build>
             <!-- log configuration -->
             <properties>
-			    <maven.compiler.executable>${env.OPENSHIFT_DATA_DIR}/jdk1.8.0_20/bin/javac</maven.compiler.executable>
+			    <maven.compiler.executable>${env.OPENSHIFT_DATA_DIR}jdk1.8.0_20/bin/javac</maven.compiler.executable>
                 <maven.compiler.fork>true</maven.compiler.fork>
             	<logback.loglevel>INFO</logback.loglevel>
             </properties>
