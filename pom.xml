@@ -727,11 +727,7 @@
             </properties>
         </profile>
         <profile>
-            <id>openshift</id>
-            <properties>
-                <maven.compiler.executable>${OPENSHIFT_DATA_DIR}/jdk1.8.0_20/bin/javac</maven.compiler.executable>
-                <maven.compiler.fork>true</maven.compiler.fork>
-            </properties>			
+            <id>openshift</id>		
             <dependencies>
                 <dependency>
                     <groupId>org.springframework.boot</groupId>
@@ -753,6 +749,8 @@
             </build>
             <!-- log configuration -->
             <properties>
+			    <maven.compiler.executable>${OPENSHIFT_DATA_DIR}/jdk1.8.0_20/bin/javac</maven.compiler.executable>
+                <maven.compiler.fork>true</maven.compiler.fork>
             	<logback.loglevel>INFO</logback.loglevel>
             </properties>
         </profile>         
