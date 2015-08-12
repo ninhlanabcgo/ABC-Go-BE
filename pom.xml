@@ -726,5 +726,31 @@
                 <logback.loglevel>INFO</logback.loglevel>
             </properties>
         </profile>
+        <profile>
+            <id>openshift</id>
+            <dependencies>
+                <dependency>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-starter-tomcat</artifactId>
+                </dependency>
+            </dependencies>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.springframework.boot</groupId>
+                        <artifactId>spring-boot-maven-plugin</artifactId>
+                        <configuration>
+                            <arguments>
+                                <argument>--spring.profiles.active=prod</argument>
+                            </arguments>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <!-- log configuration -->
+            <properties>
+            	<logback.loglevel>INFO</logback.loglevel>
+            </properties>
+        </profile>         
     </profiles>
 </project>
