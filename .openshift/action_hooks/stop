@@ -8,5 +8,5 @@ else
     kill $PID
 fi
 
-cd $OPENSHIFT_REPO_DIR
+cd $OPENSHIFT_REPO_DIR/ABC-Go
 rm -f nohup.out
