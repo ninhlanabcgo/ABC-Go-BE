@@ -18,7 +18,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.inject.Inject;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 /**
@@ -39,46 +38,46 @@ public class UserService {
     @Inject
     private AuthorityRepository authorityRepository;
 
-    public Optional<User> activateRegistration(String key) {
+    public  User activateRegistration(String key) {
         log.debug("Activating user for activation key {}", key);
-        userRepository.findOneByActivationKey(key)
-            .map(user -> {
-                // activate given user for the registration key.
-                user.setActivated(true);
-                user.setActivationKey(null);
+        User user = userRepository.findOneByActivationKey(key);
+        // activate given user for the registration key.
+        if (user != null) {
+            user.setActivated(true);
+            user.setActivationKey(null);
+            userRepository.save(user);
+            log.debug("Activated user: {}", user);
+        }
+        return user;
+    }
+
+    public User completePasswordReset(String newPassword, String key) {
+        log.debug("Reset user password for reset key {}", key);
+        User user = userRepository.findOneByResetKey(key);
+        DateTime oneDayAgo = DateTime.now().minusHours(24);
+        if (user != null && user.getActivated()) {
+            if (user.getResetDate().isAfter(oneDayAgo.toInstant().getMillis())) {
+                user.setPassword(passwordEncoder.encode(newPassword));
+                user.setResetKey(null);
+                user.setResetDate(null);
                 userRepository.save(user);
-                log.debug("Activated user: {}", user);
                 return user;
-            });
-        return Optional.empty();
+            } else {
+                return null;
+            }
+        }
+        return null;
     }
 
-    public Optional<User> completePasswordReset(String newPassword, String key) {
-       log.debug("Reset user password for reset key {}", key);
-
-       return userRepository.findOneByResetKey(key)
-           .filter(user -> {
-               DateTime oneDayAgo = DateTime.now().minusHours(24);
-               return user.getResetDate().isAfter(oneDayAgo.toInstant().getMillis());
-           })
-           .map(user -> {
-               user.setPassword(passwordEncoder.encode(newPassword));
-               user.setResetKey(null);
-               user.setResetDate(null);
-               userRepository.save(user);
-               return user;
-           });
-    }
-
-    public Optional<User> requestPasswordReset(String mail) {
-       return userRepository.findOneByEmail(mail)
-           .filter(user -> user.getActivated() == true)
-           .map(user -> {
-               user.setResetKey(RandomUtil.generateResetKey());
-               user.setResetDate(DateTime.now());
-               userRepository.save(user);
-               return user;
-           });
+    public User requestPasswordReset(String mail) {
+        User user = userRepository.findOneByEmail(mail);
+        if (user != null && user.getActivated()) {
+            user.setResetKey(RandomUtil.generateResetKey());
+            user.setResetDate(DateTime.now());
+            userRepository.save(user);
+            return user;
+        }
+        return null;
     }
 
     public User createUserInformation(String login, String password, String firstName, String lastName, String email,
@@ -107,28 +106,26 @@ public class UserService {
     }
 
     public void updateUserInformation(String firstName, String lastName, String email, String langKey) {
-        userRepository.findOneByLogin(SecurityUtils.getCurrentLogin()).ifPresent(u -> {
-            u.setFirstName(firstName);
-            u.setLastName(lastName);
-            u.setEmail(email);
-            u.setLangKey(langKey);
-            userRepository.save(u);
-            log.debug("Changed Information for User: {}", u);
-        });
+        User currentUser = userRepository.findOneByLogin(SecurityUtils.getCurrentLogin());
+        currentUser.setFirstName(firstName);
+        currentUser.setLastName(lastName);
+        currentUser.setEmail(email);
+        currentUser.setLangKey(langKey);
+        userRepository.save(currentUser);
+        log.debug("Changed Information for User: {}", currentUser);
     }
 
     public void changePassword(String password) {
-        userRepository.findOneByLogin(SecurityUtils.getCurrentLogin()).ifPresent(u-> {
-            String encryptedPassword = passwordEncoder.encode(password);
-            u.setPassword(encryptedPassword);
-            userRepository.save(u);
-            log.debug("Changed password for User: {}", u);
-        });
+        User currentUser = userRepository.findOneByLogin(SecurityUtils.getCurrentLogin());
+        String encryptedPassword = passwordEncoder.encode(password);
+        currentUser.setPassword(encryptedPassword);
+        userRepository.save(currentUser);
+        log.debug("Changed password for User: {}", currentUser);
     }
 
     @Transactional(readOnly = true)
     public User getUserWithAuthorities() {
-        User currentUser = userRepository.findOneByLogin(SecurityUtils.getCurrentLogin()).get();
+        User currentUser = userRepository.findOneByLogin(SecurityUtils.getCurrentLogin());
         currentUser.getAuthorities().size(); // eagerly load the association
         return currentUser;
     }

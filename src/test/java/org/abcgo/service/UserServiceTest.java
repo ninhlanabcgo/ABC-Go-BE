@@ -15,7 +15,6 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.springframework.test.context.web.WebAppConfiguration;
 
 import javax.inject.Inject;
-import java.util.Optional;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.*;
@@ -41,23 +40,22 @@ public class UserServiceTest {
     @Test
     public void assertThatUserMustExistToResetPassword() {
         
-        Optional<User> maybeUser = userService.requestPasswordReset("john.doe@localhost");
-        assertThat(maybeUser.isPresent()).isFalse();
+        User user = userService.requestPasswordReset("john.doe@localhost");
+        assertThat(user).isNull();
 
-        maybeUser = userService.requestPasswordReset("admin@localhost");
-        assertThat(maybeUser.isPresent()).isTrue();
-
-        assertThat(maybeUser.get().getEmail()).isEqualTo("admin@localhost");
-        assertThat(maybeUser.get().getResetDate()).isNotNull();
-        assertThat(maybeUser.get().getResetKey()).isNotNull();
+        user = userService.requestPasswordReset("admin@localhost");
+        assertThat(user).isNotNull();
+        assertThat(user.getEmail()).isEqualTo("admin@localhost");
+        assertThat(user.getResetDate()).isNotNull();
+        assertThat(user.getResetKey()).isNotNull();
         
     }
 
     @Test
     public void assertThatOnlyActivatedUserCanRequestPasswordReset() {
         User user = userService.createUserInformation("johndoe", "johndoe", "John", "Doe", "john.doe@localhost", "en-US");
-        Optional<User> maybeUser = userService.requestPasswordReset("john.doe@localhost");
-        assertThat(maybeUser.isPresent()).isFalse();
+        User maybeUser = userService.requestPasswordReset("john.doe@localhost");
+        assertThat(maybeUser).isNull();
         userRepository.delete(user);
     }
 
@@ -74,9 +72,9 @@ public class UserServiceTest {
 
         userRepository.save(user);
 
-        Optional<User> maybeUser = userService.completePasswordReset("johndoe2", user.getResetKey());
+        User maybeUser = userService.completePasswordReset("johndoe2", user.getResetKey());
 
-        assertThat(maybeUser.isPresent()).isFalse();
+        assertThat(maybeUser).isNull();
 
         userRepository.delete(user);
         
@@ -94,9 +92,9 @@ public class UserServiceTest {
 
         userRepository.save(user);
 
-        Optional<User> maybeUser = userService.completePasswordReset("johndoe2", user.getResetKey());
+        User maybeUser = userService.completePasswordReset("johndoe2", user.getResetKey());
 
-        assertThat(maybeUser.isPresent()).isFalse();
+        assertThat(maybeUser).isNull();
 
         userRepository.delete(user);
         
@@ -117,12 +115,12 @@ public class UserServiceTest {
 
         userRepository.save(user);
 
-        Optional<User> maybeUser = userService.completePasswordReset("johndoe2", user.getResetKey());
+        User maybeUser = userService.completePasswordReset("johndoe2", user.getResetKey());
 
-        assertThat(maybeUser.isPresent()).isTrue();
-        assertThat(maybeUser.get().getResetDate()).isNull();
-        assertThat(maybeUser.get().getResetKey()).isNull();
-        assertThat(maybeUser.get().getPassword()).isNotEqualTo(oldPassword);
+        assertThat(maybeUser).isNotNull();
+        assertThat(maybeUser.getResetDate()).isNull();
+        assertThat(maybeUser.getResetKey()).isNull();
+        assertThat(maybeUser.getPassword()).isNotEqualTo(oldPassword);
 
         userRepository.delete(user);
         

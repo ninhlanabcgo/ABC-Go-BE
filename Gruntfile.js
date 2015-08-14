@@ -1,4 +1,4 @@
-// Generated on 2015-08-07 using generator-jhipster 2.19.0
+// Generated on 2015-08-13 using generator-jhipster 2.19.0
 'use strict';
 var fs = require('fs');
 
@@ -360,7 +360,7 @@ module.exports = function (grunt) {
         'usemin',
         'htmlmin'
     ]);
-    
+
 	grunt.registerTask('appendSkipBower', 'Force skip of bower for Gradle', function () {
 
 		if (!grunt.file.exists(filepath)) {

@@ -22,7 +22,6 @@ import javax.validation.Valid;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.util.*;
-import java.util.stream.Collectors;
 
 /**
  * REST controller for managing the current user's account.
@@ -50,24 +49,25 @@ public class AccountResource {
             produces = MediaType.TEXT_PLAIN_VALUE)
     @Timed
     public ResponseEntity<?> registerAccount(@Valid @RequestBody UserDTO userDTO, HttpServletRequest request) {
-        return userRepository.findOneByLogin(userDTO.getLogin())
-            .map(user -> new ResponseEntity<>("login already in use", HttpStatus.BAD_REQUEST))
-            .orElseGet(() -> userRepository.findOneByEmail(userDTO.getEmail())
-                .map(user -> new ResponseEntity<>("e-mail address already in use", HttpStatus.BAD_REQUEST))
-                .orElseGet(() -> {
-                    User user = userService.createUserInformation(userDTO.getLogin(), userDTO.getPassword(),
-                    userDTO.getFirstName(), userDTO.getLastName(), userDTO.getEmail().toLowerCase(),
-                    userDTO.getLangKey());
-                    String baseUrl = request.getScheme() + // "http"
-                    "://" +                                // "://"
-                    request.getServerName() +              // "myhost"
-                    ":" +                                  // ":"
-                    request.getServerPort();               // "80"
+        User user = userRepository.findOneByLogin(userDTO.getLogin());
+        if (user != null) {
+            return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("login already in use");
+        } else {
+            if (userRepository.findOneByEmail(userDTO.getEmail()) != null) {
+                return ResponseEntity.badRequest().contentType(MediaType.TEXT_PLAIN).body("e-mail address already in use");
+            }
+            user = userService.createUserInformation(userDTO.getLogin(), userDTO.getPassword(),
+            userDTO.getFirstName(), userDTO.getLastName(), userDTO.getEmail().toLowerCase(),
+            userDTO.getLangKey());
+            String baseUrl = request.getScheme() + // "http"
+            "://" +                            // "://"
+            request.getServerName() +          // "myhost"
+            ":" +                              // ":"
+            request.getServerPort();           // "80"
 
-                    mailService.sendActivationEmail(user, baseUrl);
-                    return new ResponseEntity<>(HttpStatus.CREATED);
-                })
-        );
+            mailService.sendActivationEmail(user, baseUrl);
+            return new ResponseEntity<>(HttpStatus.CREATED);
+        }
     }
 
     /**
@@ -78,9 +78,11 @@ public class AccountResource {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<String> activateAccount(@RequestParam(value = "key") String key) {
-        return Optional.ofNullable(userService.activateRegistration(key))
-            .map(user -> new ResponseEntity<String>(HttpStatus.OK))
-            .orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+        User user = userService.activateRegistration(key);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<String>(HttpStatus.OK);
     }
 
     /**
@@ -103,21 +105,24 @@ public class AccountResource {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<UserDTO> getAccount() {
-        return Optional.ofNullable(userService.getUserWithAuthorities())
-            .map(user -> {
-                return new ResponseEntity<>(
-                    new UserDTO(
-                        user.getLogin(),
-                        null,
-                        user.getFirstName(),
-                        user.getLastName(),
-                        user.getEmail(),
-                        user.getLangKey(),
-                        user.getAuthorities().stream().map(Authority::getName)
-                            .collect(Collectors.toList())),
-                HttpStatus.OK);
-            })
-            .orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+        User user = userService.getUserWithAuthorities();
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        List<String> roles = new ArrayList<>();
+        for (Authority authority : user.getAuthorities()) {
+            roles.add(authority.getName());
+        }
+        return new ResponseEntity<>(
+            new UserDTO(
+                user.getLogin(),
+                null,
+                user.getFirstName(),
+                user.getLastName(),
+                user.getEmail(),
+                user.getLangKey(),
+                roles),
+            HttpStatus.OK);
     }
 
     /**
@@ -128,15 +133,13 @@ public class AccountResource {
             produces = MediaType.APPLICATION_JSON_VALUE)
     @Timed
     public ResponseEntity<String> saveAccount(@RequestBody UserDTO userDTO) {
-        return userRepository
-            .findOneByLogin(userDTO.getLogin())
-            .filter(u -> u.getLogin().equals(SecurityUtils.getCurrentLogin()))
-            .map(u -> {
-                userService.updateUserInformation(userDTO.getFirstName(), userDTO.getLastName(), userDTO.getEmail(),
-                    userDTO.getLangKey());
-                return new ResponseEntity<String>(HttpStatus.OK);
-            })
-            .orElseGet(() -> new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+        User userHavingThisLogin = userRepository.findOneByLogin(userDTO.getLogin());
+        if (userHavingThisLogin != null && !userHavingThisLogin.getLogin().equals(SecurityUtils.getCurrentLogin())) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        userService.updateUserInformation(userDTO.getFirstName(), userDTO.getLastName(), userDTO.getEmail(),
+            userDTO.getLangKey());
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
     /**
@@ -160,16 +163,19 @@ public class AccountResource {
     @Timed
     public ResponseEntity<?> requestPasswordReset(@RequestBody String mail, HttpServletRequest request) {
         
-        return userService.requestPasswordReset(mail)
-            .map(user -> {
-                String baseUrl = request.getScheme() +
-                    "://" +
-                    request.getServerName() +
-                    ":" +
-                    request.getServerPort();
-            mailService.sendPasswordResetMail(user, baseUrl);
-            return new ResponseEntity<>("e-mail was sent", HttpStatus.OK);
-            }).orElse(new ResponseEntity<>("e-mail address not registered", HttpStatus.BAD_REQUEST));
+        User user = userService.requestPasswordReset(mail);
+
+        if (user != null) {
+          String baseUrl = request.getScheme() +
+              "://" +
+              request.getServerName() +
+              ":" +
+              request.getServerPort();
+          mailService.sendPasswordResetMail(user, baseUrl);
+          return new ResponseEntity<>("e-mail was sent", HttpStatus.OK);
+        } else {
+          return new ResponseEntity<>("e-mail address not registered", HttpStatus.BAD_REQUEST);
+        }
         
     }
 
@@ -181,8 +187,12 @@ public class AccountResource {
         if (!checkPasswordLength(newPassword)) {
             return new ResponseEntity<>("Incorrect password", HttpStatus.BAD_REQUEST);
         }
-        return userService.completePasswordReset(newPassword, key)
-              .map(user -> new ResponseEntity<String>(HttpStatus.OK)).orElse(new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR));
+        User user = userService.completePasswordReset(newPassword, key);
+        if (user != null) {
+          return new ResponseEntity<String>(HttpStatus.OK);
+        } else {
+          return new ResponseEntity<String>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     private boolean checkPasswordLength(String password) {

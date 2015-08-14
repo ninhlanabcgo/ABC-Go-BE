@@ -22,14 +22,14 @@
 
     <properties>
         <HikariCP.version>2.3.7</HikariCP.version>
-        <assertj-core.version>3.1.0</assertj-core.version>
+        <assertj-core.version>2.1.0</assertj-core.version>
         <awaitility.version>1.4.0</awaitility.version>
         <commons-io.version>2.4</commons-io.version>
         <commons-lang.version>2.6</commons-lang.version>
         <gatling.version>2.1.6</gatling.version>
         <gatling-maven-plugin.version>2.1.6</gatling-maven-plugin.version>
         <hibernate.version>4.3.6.Final</hibernate.version>
-        <java.version>1.8</java.version>
+        <java.version>1.7</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <javax.inject.version>1</javax.inject.version>
@@ -179,7 +179,7 @@
         </dependency>
         <dependency>
             <groupId>com.zaxxer</groupId>
-            <artifactId>HikariCP</artifactId>
+            <artifactId>HikariCP-java6</artifactId>
             <version>${HikariCP.version}</version>
             <exclusions>
                 <exclusion>
@@ -272,11 +272,6 @@
             <version>${postgresql.version}</version>
         </dependency>
         <dependency>
-            <groupId>org.mapstruct</groupId>
-            <artifactId>mapstruct-jdk8</artifactId>
-            <version>${mapstruct.version}</version>
-        </dependency>
-        <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-context-support</artifactId>
         </dependency>
@@ -367,11 +362,6 @@
             <version>${spring-security.version}</version>
         </dependency>
         <!-- reporting -->
-        <dependency>
-            <groupId>fr.ippon.spark.metrics</groupId>
-            <artifactId>metrics-spark-reporter</artifactId>
-            <version>${metrics-spark-reporter.version}</version>
-        </dependency>
     </dependencies>
     <build>
         <resources>
@@ -418,7 +408,7 @@
                                     <pluginExecutionFilter>
                                         <groupId>org.apache.maven.plugins</groupId>
                                         <artifactId>maven-enforcer-plugin</artifactId>
-                                        <versionRange>[1.0,)</versionRange>                                     
+                                        <versionRange>[1.0,)</versionRange>
                                         <goals>
                                             <goal>enforce</goal>
                                         </goals>
@@ -521,7 +511,7 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
-                    <argLine>-Xmx256m</argLine>
+                    <argLine>-XX:MaxPermSize=128m -Xmx256m</argLine>
                     <!-- Force alphabetical order to have a reproducible build -->
                     <runOrder>alphabetical</runOrder>
                 </configuration>
@@ -537,39 +527,6 @@
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>sonar-maven-plugin</artifactId>
                 <version>${sonar-maven-plugin.version}</version>
-            </plugin>
-            <plugin>
-                <groupId>org.bsc.maven</groupId>
-                <artifactId>maven-processor-plugin</artifactId>
-                <version>2.2.4</version>
-                <configuration>
-                    <defaultOutputDirectory>
-                        ${project.build.directory}/generated-sources
-                    </defaultOutputDirectory>
-                    <processors>
-                        <processor>org.mapstruct.ap.MappingProcessor</processor>
-                    </processors>
-                    <options>
-                        <mapstruct.suppressGeneratorTimestamp>true</mapstruct.suppressGeneratorTimestamp>
-                        <mapstruct.defaultComponentModel>spring</mapstruct.defaultComponentModel>
-                    </options>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>process</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>process</goal>
-                        </goals>
-                    </execution>
-                </executions>
-                <dependencies>
-                    <dependency>
-                        <groupId>org.mapstruct</groupId>
-                        <artifactId>mapstruct-processor</artifactId>
-                        <version>${mapstruct.version}</version>
-                    </dependency>
-                </dependencies>
             </plugin>
             <plugin>
                 <groupId>org.liquibase</groupId>
@@ -727,7 +684,7 @@
             </properties>
         </profile>
         <profile>
-            <id>openshift</id>		
+            <id>openshift</id>
             <dependencies>
                 <dependency>
                     <groupId>org.springframework.boot</groupId>
@@ -747,12 +704,10 @@
                     </plugin>
                 </plugins>
             </build>
-            <!-- log configuration -->
             <properties>
-			    <maven.compiler.executable>${env.OPENSHIFT_DATA_DIR}jdk1.8.0_20/bin/javac</maven.compiler.executable>
-                <maven.compiler.fork>true</maven.compiler.fork>
-            	<logback.loglevel>INFO</logback.loglevel>
+                <!-- log configuration -->
+                <logback.loglevel>INFO</logback.loglevel>
             </properties>
-        </profile>         
+        </profile>        
     </profiles>
 </project>
