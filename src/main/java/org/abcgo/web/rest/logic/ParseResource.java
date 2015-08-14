@@ -1,4 +1,4 @@
-package org.abcgo.web.rest;
+package org.abcgo.web.rest.logic;
 
 import javax.inject.Inject;
 
@@ -22,7 +22,7 @@ public class ParseResource {
 	@Inject
 	private ParseService parseService;
 	
-    @RequestMapping(value = "/areas/all",
+    @RequestMapping(value = "/areas",
             method = RequestMethod.GET,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public String findAllArea() {
