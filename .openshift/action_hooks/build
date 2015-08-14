@@ -3,4 +3,5 @@ cd $OPENSHIFT_REPO_DIR/ABC-Go
 git stash
 git pull -s recursive -X theirs upstream master
 git update-index --chmod=+x .openshift/action_hooks/*
+mvn clean
 mvn package -s .openshift/settings.xml -DskipTests=true -Popenshift
