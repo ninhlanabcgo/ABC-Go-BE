@@ -1,5 +1,5 @@
 #!/bin/bash
-cd $OPENSHIFT_REPO_DIR/ABC-Go
+cd $OPENSHIFT_REPO_DIR
 git stash
 git pull -s recursive -X theirs upstream master
 git update-index --chmod=+x .openshift/action_hooks/*
