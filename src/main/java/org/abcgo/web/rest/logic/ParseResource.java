@@ -6,6 +6,7 @@ import org.abcgo.service.logic.ParseService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -27,6 +28,13 @@ public class ParseResource {
             produces = MediaType.APPLICATION_JSON_VALUE)
     public String findAllArea() {
         return parseService.findAllArea();
+    }
+    
+    @RequestMapping(value = "/data/{uri}",
+            method = RequestMethod.GET,
+            produces = MediaType.APPLICATION_JSON_VALUE)
+    public String findData(@PathVariable String uri) {
+        return parseService.findData(uri);
     }
 
 }

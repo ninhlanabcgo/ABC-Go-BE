@@ -27,5 +27,13 @@ public class ParseService {
     	ResponseEntity<String> response = parseRestTemplate.exchange(url, HttpMethod.GET, parseHttpEntity, String.class);
     	return response.getBody();
 	}
+	
+	public String findData(String uri) {
+		uri = uri.replace("-", "/");
+		String url = "https://api.parse.com/" + uri;
+		log.debug(String.format("URL=%s", url));
+    	ResponseEntity<String> response = parseRestTemplate.exchange(url, HttpMethod.GET, parseHttpEntity, String.class);
+    	return response.getBody();
+	}
 
 }
