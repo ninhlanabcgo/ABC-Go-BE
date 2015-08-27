@@ -27,8 +27,8 @@ authentication:
     oauth:
         clientid: abcgoapp
         secret: mySecretOAuthSecret
-        # Token is valid 30 minutes
-        tokenValidityInSeconds: 1800
+        # Token is valid 1 day
+        tokenValidityInSeconds: 86400
 
 swagger:
     title: abcgo API
@@ -38,3 +38,8 @@ swagger:
     contact:
     license: Apache 2.0
     licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.html
+    
+parse:
+  root.url: https://api.parse.com/
+  application.id: LOcvyGh9msyjVPK8o3EnfK7yrQesrlG657pbBk6u
+  rest.api.key: zLOVjKK8Zo8kmFwpSBAUIqS4fuORSKx5i4Nn6RC0
