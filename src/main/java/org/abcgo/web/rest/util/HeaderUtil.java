@@ -14,7 +14,7 @@ public class HeaderUtil {
         headers.add("X-abcgoApp-params", param);
         return headers;
     }
-
+    
     public static HttpHeaders createEntityCreationAlert(String entityName, String param) {
         return createAlert("abcgoApp." + entityName + ".created", param);
     }
