@@ -50,6 +50,6 @@ public class ParseResource {
             method = RequestMethod.DELETE,
             produces = MediaType.APPLICATION_JSON_VALUE)
     public String deleteDataAdmin(@PathVariable String uri) {
-        return parseService.getDataAdmin(uri);
+        return parseService.deleteDataAdmin(uri);
     }  
 }

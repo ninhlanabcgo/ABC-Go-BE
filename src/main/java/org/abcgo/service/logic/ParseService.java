@@ -49,5 +49,12 @@ public class ParseService {
 	    ResponseEntity<String> response = restTemplate.exchange(url, currentHttpMethod, httpEntity, String.class);
 	    return response.getBody();
 	}
+	
+	public String deleteDataAdmin(String uri) {
+		uri = uri.replace("-", "/");
+		String url = parseRootURL + uri;
+    	ResponseEntity<String> response = parseRestTemplate.exchange(url, HttpMethod.DELETE, parseHttpEntity, String.class);
+    	return response.getBody();
+	}	
 
 }
